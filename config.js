@@ -6,18 +6,18 @@
 module.exports = {
   // Discord OAuth2 Configuration
   discord: {
-    clientID: process.env.DISCORD_CLIENT_ID || 'YOUR_DISCORD_CLIENT_ID',
-    clientSecret: process.env.DISCORD_CLIENT_SECRET || 'YOUR_DISCORD_CLIENT_SECRET',
+    clientID: process.env.DISCORD_CLIENT_ID || '1529104213575991346',
+    clientSecret: process.env.DISCORD_CLIENT_SECRET || 'QdTXjJS16As_cVpOVarzQUFGZkofB_E1',
     // Must match your Discord app redirect URI exactly
-    callbackURL: process.env.DISCORD_REDIRECT_URI || 'http://localhost:3000/auth/discord/callback',
+    callbackURL: process.env.DISCORD_REDIRECT_URI || 'https://meteor-officialhub.vercel.app/',
     scope: ['identify', 'email']
   },
 
   // Administrative Discord IDs (array of strings)
   // These users can post announcements, view all tickets, and access live chat support
   adminIds: [
-    'OWNER_DISCORD_ID_HERE',
-    'ADMIN_DISCORD_ID_HERE'
+    '1435659333424779364',
+    '896715909475995689'
   ],
 
   // Owner Discord ID (string) - displayed on site
@@ -39,7 +39,7 @@ module.exports = {
       icon: 'E',
       iconBg: 'rgba(239, 68, 68, 0.15)',
       iconColor: '#ef4444',
-      price: null,
+      price: 'subscriptions',
       featured: false,
       features: ['Real-time exploit detection', 'Automated ban system', 'Server-side validation', 'Detailed logs & analytics']
     },
@@ -51,7 +51,7 @@ module.exports = {
       icon: 'S',
       iconBg: 'rgba(45, 212, 191, 0.15)',
       iconColor: '#2dd4bf',
-      price: '$9.99/month',
+      price: '0.99$ or 149 rbx',
       featured: true,
       features: ['Unlimited code generation', 'Debug assistant', 'Roblox API integration', 'Priority support', 'Early access to new features']
     },
@@ -63,7 +63,7 @@ module.exports = {
       icon: 'N',
       iconBg: 'rgba(250, 204, 21, 0.15)',
       iconColor: '#facc15',
-      price: null,
+      price: 'free or 199 for pro',
       featured: false,
       features: ['Zero commission fees', 'Instant payouts', 'Asset verification', 'Developer API access']
     }
@@ -71,11 +71,11 @@ module.exports = {
 
   // Links Configuration
   links: [
-    { name: 'Discord Server', description: 'Join for support & updates', url: 'https://discord.gg/YOUR_INVITE', icon: 'message-circle' },
-    { name: 'Terms of Service', description: 'Legal guidelines', url: '/legal/tos', icon: 'file-text' },
-    { name: 'Privacy Policy', description: 'Data protection info', url: '/legal/privacy', icon: 'shield' },
-    { name: 'YouTube Channel', description: 'Tutorials & showcases', url: 'https://youtube.com/@YOUR_CHANNEL', icon: 'play' },
-    { name: 'Purchase Hub', description: 'Buy our products', url: '#products', icon: 'shopping-bag' },
-    { name: 'Roblox Hub', description: 'Roblox community group', url: 'https://roblox.com/groups/YOUR_GROUP', icon: 'box' }
+    { name: 'Discord Server', description: 'Join for support & updates', url: 'https://invites.gg/meteorofficial', icon: 'message-circle' },
+    { name: 'Terms of Service', description: 'Legal guidelines', url: 'https://meteor-tos-mu.vercel.app', icon: 'file-text' },
+    { name: 'Privacy Policy', description: 'Data protection info', url: 'https://meteor-privacy-policyy.vercel.app', icon: 'shield' },
+    { name: 'YouTube Channel', description: 'Tutorials & showcases', url: 'https://www.youtube.com/@rbxmeteor', icon: 'play' },
+    { name: 'Purchase Hub', description: 'Buy our products', url: 'https://m-purchase-hub.vercel.app/', icon: 'shopping-bag' },
+    { name: 'Roblox Hub', description: 'Roblox community group', url: '', icon: 'box' }
   ]
 };
