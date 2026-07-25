@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meteor Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --bg-card: #0a0a0a;
+      --bg-hover: #111111;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.15);
+      --text: #ffffff;
+      --text-sec: #a1a1aa;
+      --text-muted: #52525b;
+      --accent: #ffffff;
+      --green: #22c55e;
+      --radius: 12px;
+      --radius-full: 9999px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+    body { min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: var(--radius-full); }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    
+    .in { animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+    .d1 { animation-delay: 0.1s; }
+    .d2 { animation-delay: 0.2s; }
+    .d3 { animation-delay: 0.3s; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 80px 0; }
+    @media (max-width: 768px) { section { padding: 60px 0; } .container { padding: 0 16px; } }
+
+    /* Dynamic Island Nav */
+    .island {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(10,10,10,0.9); backdrop-filter: blur(20px);
+      border: 1px solid var(--border); border-radius: var(--radius-full);
+      padding: 8px; display: flex; align-items: center; gap: 4px; z-index: 1000;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+      transition: all 0.3s ease; max-width: 92vw;
+    }
+    .island:hover { border-color: var(--border-hover); background: rgba(15,15,15,0.95); }
+    .ilogo { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-weight: 700; font-size: 13px; color: var(--text); text-decoration: none; border-radius: var(--radius-full); }
+    .ilogo:hover { background: rgba(255,255,255,0.05); }
+    .ilogo svg { width: 18px; height: 18px; }
+    .ilinks { display: flex; gap: 2px; }
+    .ilink { padding: 8px 14px; border-radius: var(--radius-full); font-size: 13px; font-weight: 500; color: var(--text-sec); text-decoration: none; border: none; background: none; cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
+    .ilink:hover, .ilink.active { color: var(--text); background: rgba(255,255,255,0.08); }
+    .idiv { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+    .iuser { display: flex; align-items: center; gap: 8px; padding: 2px 10px 2px 2px; border-radius: var(--radius-full); cursor: pointer; }
+    .iuser:hover { background: rgba(255,255,255,0.05); }
+    .iuser img { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); }
+    .iuser span { font-size: 12px; font-weight: 600; max-width: 70px; overflow: hidden; text-overflow: ellipsis; }
+    .imob { display: none; background: none; border: none; color: var(--text); cursor: pointer; padding: 6px; }
+    @media (max-width: 900px) {
+      .ilinks { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; flex-direction: column; background: rgba(10,10,10,0.98); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px; }
+      .ilinks.open { display: flex; }
+      .idiv { display: none; }
+      .imob { display: block; }
+    }
+
+    /* Elements */
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: var(--radius-full); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; }
+    .btn-p { background: var(--accent); color: #000; }
+    .btn-p:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(255,255,255,0.12); }
+    .btn-o { background: transparent; color: var(--text); border: 1px solid var(--border-hover); }
+    .btn-o:hover { background: rgba(255,255,255,0.05); }
+    .btn-s { padding: 8px 16px; font-size: 12px; }
+
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.5; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; transition: all 0.3s; }
+    .card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+    .g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+    .g2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+    @media (max-width: 1024px) { .g3, .g4 { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 640px) { .g3, .g4, .g2 { grid-template-columns: 1fr; } }
+
+    .grad { background: linear-gradient(180deg, #fff 0%, #888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* Hero */
+    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 60px; }
+    .meteor-logo { width: 60px; height: 60px; margin-bottom: 28px; animation: float 5s ease-in-out infinite; filter: drop-shadow(0 0 16px rgba(255,255,255,0.2)); }
+    .hero h1 { font-size: clamp(40px, 8vw, 80px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-bottom: 20px; }
+    .hero p { color: var(--text-sec); font-size: 16px; max-width: 480px; margin: 0 auto 32px; line-height: 1.7; }
+    .hero-sub { font-size: clamp(16px, 2vw, 20px); color: var(--text-sec); margin-bottom: 12px; }
+    .hstats { display: flex; gap: 48px; margin-top: 48px; }
+    .hstats .n { font-size: 32px; font-weight: 800; }
+    .hstats .l { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+    @media (max-width: 640px) { .hstats { gap: 32px; } .hstats .n { font-size: 24px; } }
+
+    .sec-h { text-align: center; max-width: 560px; margin: 0 auto 48px; }
+    .sec-h h2 { font-size: clamp(32px, 5vw, 48px); margin-bottom: 12px; font-weight: 800; }
+    .sec-h p { color: var(--text-sec); font-size: 16px; }
+
+    .tab-c { display: none; }
+    .tab-c.active { display: block; animation: fadeIn 0.4s ease; }
+
+    /* Forms */
+    .fg { margin-bottom: 16px; }
+    .fg label { display: block; font-size: 12px; font-weight: 600; color: var(--text-sec); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .inp { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 14px; transition: all 0.2s; }
+    .inp:focus { outline: none; border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.05); }
+    textarea.inp { min-height: 100px; resize: vertical; }
+
+    /* Products */
+    .pcard { position: relative; overflow: hidden; }
+    .pcard .icon { width: 44px; height: 44px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); }
+    .pcard h3 { font-size: 22px; margin-bottom: 8px; }
+    .pcard .tag { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-sec); margin-top: 12px; }
+    .pcard .price { font-size: 28px; font-weight: 800; margin: 16px 0; }
+    .pcard .price span { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+    .flist { list-style: none; margin: 16px 0; }
+    .flist li { display: flex; align-items: center; gap: 8px; padding: 6px 0; color: var(--text-sec); font-size: 13px; }
+    .flist li::before { content: ''; width: 14px; height: 14px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"); background-size: contain; flex-shrink: 0; }
+    .feat { border-color: rgba(255,255,255,0.15); background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, var(--bg-card) 100%); }
+
+    /* Announcements */
+    .annc { margin-bottom: 12px; cursor: default; }
+    .annc .meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; color: var(--text-muted); }
+    .annc .meta .a { color: var(--text-sec); font-weight: 600; }
+    .annc h3 { font-size: 18px; margin-bottom: 6px; }
+    .annc p { color: var(--text-sec); font-size: 14px; line-height: 1.6; }
+
+    /* Ratings */
+    .stars { display: flex; gap: 6px; margin: 12px 0; }
+    .star { width: 28px; height: 28px; cursor: pointer; color: var(--text-muted); transition: color 0.15s; background: none; border: none; padding: 0; }
+    .star:hover, .star.on { color: #facc15; }
+    .star svg { width: 100%; height: 100%; fill: currentColor; }
+
+    /* Tickets */
+    .tlist { display: flex; flex-direction: column; gap: 10px; }
+    .titem { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; cursor: pointer; }
+    .titem:hover { background: var(--bg-hover); }
+    .titem .st { padding: 3px 10px; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .st-open { background: rgba(34,197,94,0.12); color: var(--green); }
+    .st-closed { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+    @media (max-width: 640px) { .titem { flex-direction: column; align-items: flex-start; } }
+
+    /* Chat */
+    .chat { height: 450px; display: flex; flex-direction: column; overflow: hidden; padding: 0; }
+    .chat-msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .msg { display: flex; gap: 10px; max-width: 80%; }
+    .msg.me { align-self: flex-end; flex-direction: row-reverse; }
+    .msg.me .bub { background: rgba(255,255,255,0.1); }
+    .bub { background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: var(--radius); border: 1px solid var(--border); }
+    .bub .who { font-size: 11px; font-weight: 600; color: var(--text-sec); margin-bottom: 2px; }
+    .bub .txt { font-size: 13px; line-height: 1.5; }
+    .bub .when { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+    .chat-inp { display: flex; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border); }
+    .chat-inp input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: var(--radius-full); padding: 8px 16px; color: var(--text); font-family: inherit; font-size: 13px; }
+    .chat-inp input:focus { outline: none; border-color: rgba(255,255,255,0.2); }
+    .typing { font-size: 11px; color: var(--text-muted); padding: 0 20px; height: 18px; font-style: italic; }
+
+    /* Links */
+    .lcard { text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 12px; }
+    .lcard .ic { width: 40px; height: 40px; border-radius: var(--radius); background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-sec); transition: all 0.2s; }
+    .lcard:hover .ic { background: rgba(255,255,255,0.1); color: var(--text); border-color: var(--border-hover); }
+    .lcard h3 { font-size: 16px; }
+    .lcard p { font-size: 13px; color: var(--text-muted); }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border); padding: 32px 0; text-align: center; margin-top: 40px; }
+    .flinks { display: flex; justify-content: center; gap: 28px; margin-bottom: 20px; flex-wrap: wrap; }
+    .flinks a { color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
+    .flinks a:hover { color: var(--text); }
+
+    /* Toast */
+    .toasts { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: var(--bg-card); border: 1px solid var(--border-hover); border-radius: var(--radius); padding: 14px 20px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: fadeInUp 0.3s ease; min-width: 260px; }
+    .toast.ok { border-left: 3px solid var(--green); }
+    .toast.bad { border-left: 3px solid #ef4444; }
+
+    .gold { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,165,0,0.08)); border: 1px solid rgba(255,215,0,0.25); color: #fbbf24; padding: 3px 10px; border-radius: var(--radius-full); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  </style>
+</head>
+<body>
+
+  <!-- Dynamic Island -->
+  <nav class="island" id="nav">
+    <a href="#" class="ilogo" onclick="go('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L4 22l8-6 8 6-8-20z"/>
+      </svg>
+      <span>Meteor Hub</span>
+    </a>
+    <div class="ilinks" id="mLinks">
+      <button class="ilink active" data-t="home" onclick="go('home')">Home</button>
+      <button class="ilink" data-t="products" onclick="go('products')">Products</button>
+      <button class="ilink" data-t="announcements" onclick="go('announcements')">Announcements</button>
+      <button class="ilink" data-t="rate" onclick="go('rate')">Rate</button>
+      <button class="ilink" data-t="links" onclick="go('links')">Links</button>
+      <button class="ilink" data-t="support" onclick="go('support')">Support</button>
+      <button class="ilink" data-t="info" onclick="go('info')">Info</button>
+    </div>
+    <div class="idiv"></div>
+    <button class="imob" onclick="toggleMob()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div id="authBox">
+      <a href="/auth/discord" class="btn btn-s btn-p">Login</a>
+    </div>
+  </nav>
+
+  <div class="toasts" id="toasts"></div>
+
+  <!-- HOME -->
+  <div id="t-home" class="tab-c active">
+    <section class="hero">
+      <svg class="meteor-logo" viewBox="0 0 64 64" fill="none">
+        <path d="M32 4L20 24l-8 4 8 6-1 8 13-5 13 5-1-8 8-6-8-4L32 4z" fill="url(#g1)"/>
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#666"/></linearGradient></defs>
+      </svg>
+      <div class="badge in">Discord Development Studio</div>
+      <h1 class="grad in d1">Meteor Hub</h1>
+      <p class="hero-sub in d2">The future of Discord development</p>
+      <p class="in d2">We are a modern Roblox community that builds premium products for Roblox developers. From anti-cheat systems to AI coding assistants, we craft tools that empower creators worldwide.</p>
+      <div class="in d3" style="margin-top:8px;">
+        <button class="btn btn-p" onclick="go('products')">Explore Products <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+      </div>
+      <div class="hstats in d3">
+        <div><div class="n grad" id="statUsers">1</div><div class="l">Users</div></div>
+        <div><div class="n grad" id="statRate">4.8</div><div class="l">Rating</div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="sec-h">
+          <div class="badge">Why Meteor</div>
+          <h2 class="grad">Built Different</h2>
+          <p>What sets our products apart from the rest.</p>
+        </div>
+        <div class="g4">
+          <div class="card"><div style="font-size:20px;margin-bottom:12px;">⚡</div><h3 style="font-size:16px;margin-bottom:8px;">Lightning Fast</h3><p style="font-size:13px;">Optimized for speed with sub-100ms response times globally.</p></div>
+          <div class="card"><div style="font-size:20px;margin-bottom:12px;">🛡️</div><h3 style="font-size:16px;margin-bottom:8px;">Secure by Default</h3><p style="font-size:13px;">End-to-end encryption and enterprise-grade security standards.</p></div>
+          <div class="card"><div style="font-size:20px;margin-bottom:12px;">🛠️</div><h3 style="font-size:16px;margin-bottom:8px;">Developer Friendly</h3><p style="font-size:13px;">Clean APIs, detailed docs, and active developer support.</p></div>
+          <div class="card"><div style="font-size:20px;margin-bottom:12px;">📈</div><h3 style="font-size:16px;margin-bottom:8px;">Scales With You</h3><p style="font-size:13px;">From small servers to communities with millions of members.</p></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div id="t-products" class="tab-c">
+    <section style="padding-top:120px;">
+      <div class="container">
+        <div class="sec-h">
+          <div class="badge">Our Products</div>
+          <h2 class="grad">Built for Discord</h2>
+          <p>Three powerful platforms designed to enhance your Discord experience.</p>
+        </div>
+        <div class="g3" id="prodGrid"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ANNOUNCEMENTS -->
+  <div id="t-announcements" class="tab-c">
+    <section style="padding-top:120px;">
+      <div class="container" style="max-width:800px;">
+        <div class="sec-h">
+          <div class="badge">Announcements</div>
+          <h2 class="grad">Latest News</h2>
+          <p>Stay updated with the latest from Meteor Hub.</p>
+        </div>
+        <div id="annForm" style="display:none;" class="card" style="margin-bottom:24px;">
+          <h3 style="margin-bottom:16px;">Post Announcement</h3>
+          <div class="fg"><label>Title</label><input type="text" class="inp" id="annTitle" placeholder="Announcement title"></div>
+          <div class="fg"><label>Content</label><textarea class="inp" id="annBody" placeholder="What's new?"></textarea></div>
+          <button class="btn btn-p btn-s" onclick="postAnn()">Publish</button>
+        </div>
+        <div id="annList"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- RATE -->
+  <div id="t-rate" class="tab-c">
+    <section style="padding-top:120px;">
+      <div class="container" style="max-width:700px;">
+        <div class="sec-h">
+          <div class="badge">Rate Us</div>
+          <h2 class="grad">Your Feedback</h2>
+          <p>Rate our products and help us improve.</p>
+        </div>
+        <div class="card" id="rateBox" style="display:none;">
+          <h3 style="margin-bottom:8px;">Rate a Product</h3>
+          <div class="fg"><label>Select Product</label><select class="inp" id="rateProd"><option value="">Choose...</option></select></div>
+          <div class="fg"><label>Rating</label><div class="stars" id="rateStars"></div></div>
+          <div class="fg"><label>Comment (optional)</label><textarea class="inp" id="rateComment" placeholder="Your thoughts..."></textarea></div>
+          <button class="btn btn-p btn-s" onclick="submitRate()">Submit Rating</button>
+        </div>
+        <div id="rateDisplay" class="g2" style="margin-top:24px;"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- LINKS -->
+  <div id="t-links" class="tab-c">
+    <section style="padding-top:120px;">
+      <div class="container">
+        <div class="sec-h">
+          <div class="badge">Everything Meteor</div>
+          <h2 class="grad">Quick Links</h2>
+          <p>Find all our resources and platforms in one place.</p>
+        </div>
+        <div class="g4" id="linkGrid"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- SUPPORT -->
+  <div id="t-support" class="tab-c">
+    <section style="padding-top:120px;">
+      <div class="container" style="max-width:900px;">
+        <div class="sec-h">
+          <div class="badge">Support Center</div>
+          <h2 class="grad">Need Help?</h2>
+          <p>Submit a ticket or chat with our team in real-time.</p>
+        </div>
+        
+        <div class="card" id="ticketForm" style="display:none; margin-bottom:24px;">
+          <h3 style="margin-bottom:16px;">New Ticket</h3>
+          <div class="fg"><label>Subject</label><input type="text" class="inp" id="ticTitle" placeholder="Brief summary"></div>
+          <div class="fg"><label>Description</label><textarea class="inp" id="ticDesc" placeholder="Describe your issue in detail..."></textarea></div>
+          <button class="btn btn-p btn-s" onclick="submitTicket()">Submit Ticket</button>
+        </div>
+
+        <div id="ticketView" style="display:none;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+            <button class="btn btn-o btn-s" onclick="closeTicketView()">Back</button>
+            <h3 id="ticViewTitle">Ticket</h3>
+            <span class="st-open" id="ticViewStatus">Open</span>
+          </div>
+          <div class="card chat">
+            <div class="chat-msgs" id="chatMsgs"></div>
+            <div class="typing" id="typing"></div>
+            <div class="chat-inp">
+              <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendMsg()">
+              <button class="btn btn-p btn-s" onclick="sendMsg()">Send</button>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:16px; font-size:18px;">Your Tickets</h3>
+        <div class="tlist" id="ticketList"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- INFO -->
+  <div id="t-info" class="tab-c">
+    <section style="padding-top:120px;">
+      <div class="container" style="max-width:700px;">
+        <div class="sec-h">
+          <div class="badge">About Us</div>
+          <h2 class="grad">Empowering Discord Developers</h2>
+          <p>We build products that solve real problems for Discord communities and developers around the world.</p>
+        </div>
+        <div class="g2">
+          <div class="card"><h3 style="margin-bottom:10px;">Mission</h3><p style="font-size:14px;">Create powerful, accessible tools that help Discord server owners and developers build better, safer, and more engaging communities.</p></div>
+          <div class="card"><h3 style="margin-bottom:10px;">Innovation</h3><p style="font-size:14px;">Constantly pushing boundaries with AI, security, and commerce solutions tailored specifically for the Discord ecosystem.</p></div>
+          <div class="card"><h3 style="margin-bottom:10px;">Community</h3><p style="font-size:14px;">Developer-first approach with open feedback channels and direct support through our active Discord server.</p></div>
+          <div class="card"><h3 style="margin-bottom:10px;">Trust</h3><p style="font-size:14px;">Enterprise-grade security and reliability. Your data and communities are protected with industry-leading standards.</p></div>
+        </div>
+        
+        <div class="card" style="margin-top:24px; text-align:center;">
+          <h3 style="margin-bottom:12px;">Owner</h3>
+          <div id="ownerDisplay" style="display:flex; align-items:center; justify-content:center; gap:12px;">
+            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#333,#111);border:1px solid var(--border);"></div>
+            <div style="text-align:left;"><div style="font-weight:700;">Loading...</div><div style="font-size:13px;color:var(--text-muted);">Server Owner</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="flinks">
+        <a href="#" onclick="go('home')">Home</a>
+        <a href="#" onclick="go('products')">Products</a>
+        <a href="#" onclick="go('info')">About</a>
+        <a href="#" onclick="go('support')">Support</a>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);"> Meteor Hub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // CONFIGURATION - EDIT THIS
+    const CONFIG = {
+      // Your Discord OAuth2 redirect URI must match exactly what's in your Discord app
+      discordRedirect: window.location.origin + '/auth/discord',
+      // Products displayed on the site (also fetched from server, this is fallback)
+      products: [
+        { id:'enclave', name:'Enclave', tag:'Roblox Security', desc:'The best anti-cheat solution for Roblox games. Protect your experiences from exploiters, hackers, and cheaters with real-time detection.', icon:'E', iconBg:'rgba(239,68,68,0.15)', iconColor:'#ef4444', price:null, features:['Real-time exploit detection','Automated ban system','Server-side validation','Detailed logs'] },
+        { id:'swift', name:'Swift', tag:'Roblox AI', desc:'AI-Powered Roblox Coder. Generate complete Lua scripts, debug issues, and learn best practices with AI. Built exclusively for Roblox developers.', icon:'S', iconBg:'rgba(45,212,191,0.15)', iconColor:'#2dd4bf', price:'$9.99/month', features:['Unlimited code generation','Debug assistant','Roblox API integration','Priority support','Early access'], featured:true },
+        { id:'nectar', name:'Nectar', tag:'Roblox Marketplace', desc:'A complete marketplace platform for Roblox. Sell gamepasses, assets, scripts, and services to players and fellow developers.', icon:'N', iconBg:'rgba(250,204,21,0.15)', iconColor:'#facc15', price:null, features:['Zero commission fees','Instant payouts','Asset verification','Developer API'] }
+      ],
+      // Quick links
+      links: [
+        { name:'Discord Server', desc:'Join for support & updates', url:'https://discord.gg/meteor', icon:'M' },
+        { name:'Terms of Service', desc:'Legal guidelines', url:'/legal/tos', icon:'T' },
+        { name:'Privacy Policy', desc:'Data protection info', url:'/legal/privacy', icon:'P' },
+        { name:'YouTube Channel', desc:'Tutorials & showcases', url:'https://youtube.com/@meteorhub', icon:'Y' },
+        { name:'Purchase Hub', desc:'Buy our products', url:'#products', icon:'B' },
+        { name:'Roblox Hub', desc:'Roblox community', url:'https://roblox.com/groups/meteor', icon:'R' }
+      ]
+    };
+
+    let user = null;
+    let ws = null;
+    let currentTicket = null;
+    let products = [];
+    let links = [];
+
+    // Init
+    async function init() {
+      await loadUser();
+      await loadProducts();
+      await loadLinks();
+      renderProducts();
+      renderLinks();
+      loadAnnouncements();
+      loadTickets();
+      loadRatings();
+      setupStars();
+    }
+
+    async function loadUser() {
+      try {
+        const r = await fetch('/api/user');
+        user = r.ok ? await r.json() : null;
+      } catch(e) { user = null; }
+      updateAuth();
+    }
+
+    function updateAuth() {
+      const box = document.getElementById('authBox');
+      if (user) {
+        box.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="iuser" onclick="logout()">
+              <img src="https://cdn.discordapp.com/avatars/${user.discord_id}/${user.avatar}.png" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+              <span>${user.username}</span>
+            </div>
+            ${user.isAdmin ? '<span class="gold">Admin</span>' : ''}
+          </div>`;
+        document.getElementById('annForm').style.display = user.isAdmin ? 'block' : 'none';
+        document.getElementById('ticketForm').style.display = 'block';
+        document.getElementById('rateBox').style.display = 'block';
+      } else {
+        box.innerHTML = `<a href="/auth/discord" class="btn btn-s btn-p">Login</a>`;
+      }
+    }
+
+    function logout() {
+      fetch('/auth/logout').then(() => window.location.reload());
+    }
+
+    async function loadProducts() {
+      try { const r = await fetch('/api/products'); if(r.ok) products = await r.json(); } 
+      catch(e) { products = CONFIG.products; }
+      if(!products.length) products = CONFIG.products;
+      const sel = document.getElementById('rateProd');
+      sel.innerHTML = '<option value="">Choose...</option>' + products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    }
+
+    async function loadLinks() {
+      try { const r = await fetch('/api/links'); if(r.ok) links = await r.json(); }
+      catch(e) { links = CONFIG.links; }
+      if(!links.length) links = CONFIG.links;
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('prodGrid');
+      grid.innerHTML = products.map(p => `
+        <div class="card pcard ${p.featured?'feat':''}">
+          ${p.featured?'<span style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:var(--radius-full);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Featured</span>':''}
+          <div class="icon" style="background:${p.iconBg};color:${p.iconColor};">${p.icon}</div>
+          <h3>${p.name}</h3>
+          <p style="font-size:14px;color:var(--text-sec);line-height:1.6;margin-bottom:8px;">${p.desc}</p>
+          ${p.price?`<div class="price">${p.price}<span>/month</span></div>`:''}
+          <ul class="flist">${p.features.map(f=>`<li>${f}</li>`).join('')}</ul>
+          <span class="tag">${p.tag}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderLinks() {
+      const grid = document.getElementById('linkGrid');
+      grid.innerHTML = links.map(l => `
+        <a href="${l.url}" class="card lcard" target="${l.url.startsWith('http')?'_blank':'_self'}">
+          <div class="ic"><span style="font-weight:800;font-size:16px;">${l.icon}</span></div>
+          <h3>${l.name}</h3>
+          <p>${l.desc}</p>
+        </a>
+      `).join('');
+    }
+
+    // Navigation
+    function go(tab) {
+      document.querySelectorAll('.tab-c').forEach(t => t.classList.remove('active'));
+      document.getElementById('t-' + tab).classList.add('active');
+      document.querySelectorAll('.ilink').forEach(l => l.classList.toggle('active', l.dataset.t === tab));
+      document.getElementById('mLinks').classList.remove('open');
+      window.scrollTo(0,0);
+      if(tab==='announcements') loadAnnouncements();
+      if(tab==='support') loadTickets();
+      if(tab==='rate') loadRatings();
+    }
+
+    function toggleMob() {
+      document.getElementById('mLinks').classList.toggle('open');
+    }
+
+    // Announcements
+    async function loadAnnouncements() {
+      try {
+        const r = await fetch('/api/announcements');
+        const list = r.ok ? await r.json() : [];
+        const box = document.getElementById('annList');
+        if(!list.length) { box.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px;">No announcements yet.</p>'; return; }
+        box.innerHTML = list.map(a => `
+          <div class="card annc">
+            <div class="meta"><span class="a">${a.author_name}</span><span>•</span><span>${new Date(a.created_at).toLocaleDateString()}</span></div>
+            <h3>${a.title}</h3>
+            <p>${a.content}</p>
+          </div>
+        `).join('');
+      } catch(e) {}
+    }
+
+    async function postAnn() {
+      const title = document.getElementById('annTitle').value;
+      const content = document.getElementById('annBody').value;
+      if(!title||!content) return toast('Fill all fields', 'bad');
+      try {
+        const r = await fetch('/api/announcements', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title,content}) });
+        if(r.ok) { toast('Posted!','ok'); document.getElementById('annTitle').value=''; document.getElementById('annBody').value=''; loadAnnouncements(); }
+        else toast('Failed to post','bad');
+      } catch(e) { toast('Error','bad'); }
+    }
+
+    // Ratings
+    let currentRate = 0;
+    function setupStars() {
+      const box = document.getElementById('rateStars');
+      for(let i=1;i<=5;i++) {
+        const s = document.createElement('button');
+        s.className = 'star';
+        s.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+        s.onclick = () => { currentRate = i; updateStars(); };
+        s.onmouseenter = () => previewStars(i);
+        s.onmouseleave = () => updateStars();
+        box.appendChild(s);
+      }
+    }
+    function updateStars() {
+      document.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('on', i < currentRate));
+    }
+    function previewStars(n) {
+      document.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('on', i < n));
+    }
+    async function submitRate() {
+      const pid = document.getElementById('rateProd').value;
+      if(!pid||!currentRate) return toast('Select product and rating','bad');
+      try {
+        const r = await fetch('/api/ratings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({productId:pid,rating:currentRate,comment:document.getElementById('rateComment').value}) });
+        if(r.ok) { toast('Rating submitted!','ok'); currentRate=0; updateStars(); document.getElementById('rateComment').value=''; loadRatings(); }
+        else toast('Failed','bad');
+      } catch(e) { toast('Error','bad'); }
+    }
+    async function loadRatings() {
+      const box = document.getElementById('rateDisplay');
+      box.innerHTML = '';
+      for(const p of products) {
+        try {
+          const r = await fetch('/api/ratings/'+p.id);
+          const d = await r.json();
+          box.innerHTML += `
+            <div class="card">
+              <h3 style="margin-bottom:4px;">${p.name}</h3>
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <span style="font-size:36px;font-weight:800;">${d.average}</span>
+                <span style="color:var(--text-muted);font-size:13px;">${d.count} reviews</span>
+              </div>
+              <div class="stars" style="pointer-events:none;margin-top:8px;">
+                ${[1,2,3,4,5].map(i=>`<div class="star ${i<=Math.round(d.average)?'on':''}"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>`).join('')}
+              </div>
+            </div>`;
+        } catch(e) {}
+      }
+    }
+
+    // Tickets
+    async function loadTickets() {
+      if(!user) { document.getElementById('ticketList').innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;">Login to view tickets.</p>'; return; }
+      try {
+        const r = await fetch('/api/tickets');
+        const list = await r.json();
+        const box = document.getElementById('ticketList');
+        if(!list.length) { box.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:20px;">No tickets yet.</p>'; return; }
+        box.innerHTML = list.map(t => `
+          <div class="card titem" onclick="openTicket(${t.id}, '${t.title}', '${t.status}')">
+            <div>
+              <div style="font-weight:600;margin-bottom:2px;">${t.title}</div>
+              <div style="font-size:12px;color:var(--text-muted);">By ${t.user_name} • ${new Date(t.created_at).toLocaleDateString()}</div>
+            </div>
+            <span class="st st-${t.status}">${t.status}</span>
+          </div>
+        `).join('');
+      } catch(e) {}
+    }
+
+    async function submitTicket() {
+      const title = document.getElementById('ticTitle').value;
+      const desc = document.getElementById('ticDesc').value;
+      if(!title||!desc) return toast('Fill all fields','bad');
+      try {
+        const r = await fetch('/api/tickets', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title,description:desc}) });
+        if(r.ok) { toast('Ticket created','ok'); document.getElementById('ticTitle').value=''; document.getElementById('ticDesc').value=''; loadTickets(); }
+        else toast('Failed','bad');
+      } catch(e) { toast('Error','bad'); }
+    }
+
+    async function openTicket(id, title, status) {
+      currentTicket = id;
+      document.getElementById('ticketView').style.display = 'block';
+      document.getElementById('ticketList').style.display = 'none';
+      document.getElementById('ticketForm').style.display = 'none';
+      document.getElementById('ticViewTitle').textContent = title;
+      document.getElementById('ticViewStatus').textContent = status;
+      document.getElementById('ticViewStatus').className = 'st st-' + status;
+      
+      // Load messages
+      try {
+        const r = await fetch('/api/tickets/'+id+'/messages');
+        const msgs = await r.json();
+        renderMessages(msgs);
+      } catch(e) {}
+      
+      // Connect WebSocket
+      connectWs(id);
+    }
+
+    function closeTicketView() {
+      currentTicket = null;
+      document.getElementById('ticketView').style.display = 'none';
+      document.getElementById('ticketList').style.display = 'flex';
+      document.getElementById('ticketForm').style.display = user ? 'block' : 'none';
+      if(ws) ws.close();
+    }
+
+    function renderMessages(msgs) {
+      const box = document.getElementById('chatMsgs');
+      box.innerHTML = msgs.map(m => `
+        <div class="msg ${m.sender_id===user?.discord_id?'me':''}">
+          <img class="message-avatar" src="https://cdn.discordapp.com/avatars/${m.sender_id}/${m.sender_avatar}.png" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+          <div class="bub">
+            <div class="who">${m.sender_name}</div>
+            <div class="txt">${m.content}</div>
+            <div class="when">${new Date(m.created_at).toLocaleTimeString()}</div>
+          </div>
+        </div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function connectWs(ticketId) {
+      if(ws) ws.close();
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(proto + '//' + window.location.host);
+      ws.onopen = () => ws.send(JSON.stringify({type:'join_ticket',ticketId,userId:user?.discord_id}));
+      ws.onmessage = (e) => {
+        const d = JSON.parse(e.data);
+        if(d.type==='message') {
+          const m = d.data;
+          const box = document.getElementById('chatMsgs');
+          const isMe = m.sender_id === user?.discord_id;
+          box.innerHTML += `
+            <div class="msg ${isMe?'me':''}">
+              <img class="message-avatar" src="https://cdn.discordapp.com/avatars/${m.sender_id}/${m.sender_avatar}.png" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+              <div class="bub">
+                <div class="who">${m.sender_name}</div>
+                <div class="txt">${m.content}</div>
+                <div class="when">${new Date(m.created_at).toLocaleTimeString()}</div>
+              </div>
+            </div>`;
+          box.scrollTop = box.scrollHeight;
+        }
+        if(d.type==='typing') {
+          document.getElementById('typing').textContent = d.userName + ' is typing...';
+          setTimeout(() => document.getElementById('typing').textContent = '', 2000);
+        }
+      };
+    }
+
+    async function sendMsg() {
+      const inp = document.getElementById('chatInput');
+      const txt = inp.value.trim();
+      if(!txt||!currentTicket) return;
+      try {
+        await fetch('/api/tickets/'+currentTicket+'/messages', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content:txt}) });
+        inp.value = '';
+      } catch(e) {}
+    }
+
+    // Typing indicator
+    document.getElementById('chatInput')?.addEventListener('input', () => {
+      if(ws && ws.readyState===1) ws.send(JSON.stringify({type:'typing',ticketId:currentTicket,userId:user?.discord_id,userName:user?.username}));
+    });
+
+    // Toast
+    function toast(msg, type) {
+      const t = document.createElement('div');
+      t.className = 'toast ' + (type==='ok'?'ok':'bad');
+      t.textContent = msg;
+      document.getElementById('toasts').appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>
